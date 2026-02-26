@@ -1,0 +1,140 @@
+package com.timetracker.app.presentation.navigation
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import androidx.navigation.navArgument
+import com.timetracker.app.presentation.tracker.TrackerScreen
+import com.timetracker.app.presentation.history.HistoryScreen
+import com.timetracker.app.presentation.stats.StatsScreen
+import com.timetracker.app.presentation.activities.ActivitiesScreen
+import com.timetracker.app.presentation.activities.EditActivityScreen
+import com.timetracker.app.presentation.groups.GroupsScreen
+import com.timetracker.app.presentation.entry.EditEntryScreen
+import com.timetracker.app.presentation.export.ExportScreen
+
+object Routes {
+    const val TRACKER = "tracker"
+    const val HISTORY = "history"
+    const val STATS = "stats"
+    const val ACTIVITIES = "activities"
+    const val EDIT_ACTIVITY = "edit_activity/{activityId}"
+    const val NEW_ACTIVITY = "edit_activity/new"
+    const val GROUPS = "groups"
+    const val EDIT_ENTRY = "edit_entry/{entryId}"
+    const val NEW_ENTRY = "edit_entry/new"
+    const val EXPORT = "export"
+
+    fun editActivity(id: Long) = "edit_activity/$id"
+    fun editEntry(id: Long) = "edit_entry/$id"
+}
+
+enum class BottomTab(val route: String, val label: String, val icon: String) {
+    Tracker(Routes.TRACKER, "Tracker", "timer"),
+    History(Routes.HISTORY, "History", "list"),
+    Stats(Routes.STATS, "Stats", "chart"),
+}
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    val bottomTabs = BottomTab.entries
+    val isBottomBarVisible = bottomTabs.any { it.route == currentRoute }
+
+    Scaffold(
+        bottomBar = {
+            if (isBottomBarVisible) {
+                NavigationBar {
+                    bottomTabs.forEach { tab ->
+                        NavigationBarItem(
+                            selected = currentRoute == tab.route,
+                            onClick = {
+                                if (currentRoute != tab.route) {
+                                    navController.navigate(tab.route) {
+                                        popUpTo(Routes.TRACKER) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            label = { Text(tab.label) },
+                            icon = {
+                                when (tab) {
+                                    BottomTab.Tracker -> Text("\u23F1", style = MaterialTheme.typography.titleMedium)
+                                    BottomTab.History -> Text("\u2630", style = MaterialTheme.typography.titleMedium)
+                                    BottomTab.Stats -> Text("\u2603", style = MaterialTheme.typography.titleMedium)
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+        },
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = Routes.TRACKER,
+            modifier = Modifier.padding(padding),
+        ) {
+            composable(Routes.TRACKER) {
+                TrackerScreen(
+                    onManageActivities = { navController.navigate(Routes.ACTIVITIES) },
+                )
+            }
+            composable(Routes.HISTORY) {
+                HistoryScreen(
+                    onEditEntry = { navController.navigate(Routes.editEntry(it)) },
+                    onNewEntry = { navController.navigate(Routes.NEW_ENTRY) },
+                )
+            }
+            composable(Routes.STATS) {
+                StatsScreen(
+                    onExport = { navController.navigate(Routes.EXPORT) },
+                )
+            }
+            composable(Routes.ACTIVITIES) {
+                ActivitiesScreen(
+                    onEditActivity = { navController.navigate(Routes.editActivity(it)) },
+                    onNewActivity = { navController.navigate(Routes.NEW_ACTIVITY) },
+                    onManageGroups = { navController.navigate(Routes.GROUPS) },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable(
+                Routes.EDIT_ACTIVITY,
+                arguments = listOf(navArgument("activityId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val activityIdStr = backStackEntry.arguments?.getString("activityId")
+                val activityId = activityIdStr?.toLongOrNull()
+                EditActivityScreen(
+                    activityId = activityId,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable(Routes.GROUPS) {
+                GroupsScreen(onBack = { navController.popBackStack() })
+            }
+            composable(
+                Routes.EDIT_ENTRY,
+                arguments = listOf(navArgument("entryId") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val entryIdStr = backStackEntry.arguments?.getString("entryId")
+                val entryId = entryIdStr?.toLongOrNull()
+                EditEntryScreen(
+                    entryId = entryId,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable(Routes.EXPORT) {
+                ExportScreen(onBack = { navController.popBackStack() })
+            }
+        }
+    }
+}

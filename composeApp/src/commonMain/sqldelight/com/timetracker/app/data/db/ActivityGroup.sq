@@ -1,0 +1,27 @@
+CREATE TABLE ActivityGroup (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    color INTEGER NOT NULL DEFAULT -1,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM ActivityGroup ORDER BY sort_order ASC, name ASC;
+
+selectById:
+SELECT * FROM ActivityGroup WHERE id = ?;
+
+insert:
+INSERT INTO ActivityGroup(name, color, sort_order, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?);
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+update:
+UPDATE ActivityGroup SET name = ?, color = ?, sort_order = ?, updated_at = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM ActivityGroup WHERE id = ?;

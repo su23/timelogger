@@ -1,0 +1,42 @@
+CREATE TABLE Activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    icon TEXT NOT NULL DEFAULT "",
+    color INTEGER NOT NULL DEFAULT -16737793,
+    group_id INTEGER REFERENCES ActivityGroup(id) ON DELETE SET NULL,
+    is_archived INTEGER NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM Activity WHERE is_archived = 0 ORDER BY sort_order ASC, name ASC;
+
+selectAllIncludingArchived:
+SELECT * FROM Activity ORDER BY sort_order ASC, name ASC;
+
+selectById:
+SELECT * FROM Activity WHERE id = ?;
+
+selectByGroupId:
+SELECT * FROM Activity WHERE group_id = ? AND is_archived = 0 ORDER BY sort_order ASC, name ASC;
+
+insert:
+INSERT INTO Activity(name, icon, color, group_id, is_archived, sort_order, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+update:
+UPDATE Activity SET name = ?, icon = ?, color = ?, group_id = ?, is_archived = ?, sort_order = ?, updated_at = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM Activity WHERE id = ?;
+
+archive:
+UPDATE Activity SET is_archived = 1, updated_at = ? WHERE id = ?;
+
+unarchive:
+UPDATE Activity SET is_archived = 0, updated_at = ? WHERE id = ?;
