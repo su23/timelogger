@@ -1,0 +1,37 @@
+CREATE TABLE CustomFieldValue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_id INTEGER NOT NULL REFERENCES TimeEntry(id) ON DELETE CASCADE,
+    field_id INTEGER NOT NULL REFERENCES CustomField(id) ON DELETE CASCADE,
+    value TEXT NOT NULL DEFAULT "",
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX idx_cfv_entry ON CustomFieldValue(entry_id);
+CREATE INDEX idx_cfv_field ON CustomFieldValue(field_id);
+
+selectByEntryId:
+SELECT * FROM CustomFieldValue WHERE entry_id = ?;
+
+selectByEntryAndField:
+SELECT * FROM CustomFieldValue WHERE entry_id = ? AND field_id = ?;
+
+upsert:
+INSERT OR REPLACE INTO CustomFieldValue(id, entry_id, field_id, value, created_at, updated_at)
+VALUES (
+    (SELECT id FROM CustomFieldValue WHERE entry_id = ? AND field_id = ?),
+    ?, ?, ?, ?, ?
+);
+
+insert:
+INSERT INTO CustomFieldValue(entry_id, field_id, value, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?);
+
+update:
+UPDATE CustomFieldValue SET value = ?, updated_at = ? WHERE id = ?;
+
+deleteByEntryId:
+DELETE FROM CustomFieldValue WHERE entry_id = ?;
+
+deleteById:
+DELETE FROM CustomFieldValue WHERE id = ?;

@@ -1,0 +1,16 @@
+CREATE TABLE AppSetting (
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+);
+
+selectByKey:
+SELECT value FROM AppSetting WHERE key = ?;
+
+selectAll:
+SELECT * FROM AppSetting;
+
+upsert:
+INSERT OR REPLACE INTO AppSetting(key, value) VALUES (?, ?);
+
+deleteByKey:
+DELETE FROM AppSetting WHERE key = ?;

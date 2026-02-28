@@ -1,0 +1,37 @@
+CREATE TABLE Goal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER NOT NULL REFERENCES Activity(id) ON DELETE CASCADE,
+    goal_type TEXT NOT NULL DEFAULT "min",
+    period TEXT NOT NULL DEFAULT "daily",
+    target_ms INTEGER NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX idx_goal_activity ON Goal(activity_id);
+
+selectAll:
+SELECT * FROM Goal WHERE is_active = 1 ORDER BY activity_id ASC;
+
+selectAllIncludingInactive:
+SELECT * FROM Goal ORDER BY activity_id ASC;
+
+selectById:
+SELECT * FROM Goal WHERE id = ?;
+
+selectByActivityId:
+SELECT * FROM Goal WHERE activity_id = ? AND is_active = 1;
+
+insert:
+INSERT INTO Goal(activity_id, goal_type, period, target_ms, is_active, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+update:
+UPDATE Goal SET activity_id = ?, goal_type = ?, period = ?, target_ms = ?, is_active = ?, updated_at = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM Goal WHERE id = ?;

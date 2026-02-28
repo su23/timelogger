@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.timetracker.app.domain.model.Activity
 import com.timetracker.app.domain.model.TimeEntry
+import com.timetracker.app.presentation.components.CalendarView
 import com.timetracker.app.util.formatDuration
 import kotlinx.datetime.*
 import org.koin.compose.viewmodel.koinViewModel
@@ -26,7 +27,14 @@ fun HistoryScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("History") })
+            TopAppBar(
+                title = { Text("History") },
+                actions = {
+                    TextButton(onClick = { viewModel.toggleCalendar() }) {
+                        Text(if (state.showCalendar) "List" else "Calendar")
+                    }
+                },
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewEntry) {
@@ -38,6 +46,51 @@ fun HistoryScreen(
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
+        } else if (state.showCalendar) {
+            // Calendar view
+            Column(
+                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+            ) {
+                CalendarView(
+                    yearMonth = state.calendarYear to state.calendarMonth,
+                    daySummaries = state.daySummaries,
+                    onDayClick = { date -> viewModel.selectDate(date) },
+                    onPreviousMonth = { viewModel.previousMonth() },
+                    onNextMonth = { viewModel.nextMonth() },
+                )
+
+                // Show entries for selected date
+                state.selectedDate?.let { date ->
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = formatDateLabel(date),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    val entries = state.entriesByDate[date]
+                    if (entries != null && entries.isNotEmpty()) {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            items(entries, key = { (entry, _) -> entry.id }) { (entry, activity) ->
+                                EntryRow(
+                                    entry = entry,
+                                    activity = activity,
+                                    onClick = { onEditEntry(entry.id) },
+                                    onDelete = { viewModel.deleteEntry(entry.id) },
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            "No entries for this day",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         } else if (state.entriesByDate.isEmpty()) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Text("No entries yet. Start tracking!", style = MaterialTheme.typography.bodyLarge)
@@ -47,7 +100,13 @@ fun HistoryScreen(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(16.dp),
             ) {
-                state.entriesByDate.forEach { (date, entries) ->
+                val entriesToShow = if (state.selectedDate != null) {
+                    state.entriesByDate.filterKeys { it == state.selectedDate }
+                } else {
+                    state.entriesByDate
+                }
+
+                entriesToShow.forEach { (date, entries) ->
                     item(key = "header_$date") {
                         DateHeader(date)
                     }
@@ -67,17 +126,20 @@ fun HistoryScreen(
 
 @Composable
 private fun DateHeader(date: LocalDate) {
+    Text(
+        text = formatDateLabel(date),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(vertical = 8.dp),
+    )
+}
+
+private fun formatDateLabel(date: LocalDate): String {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val label = when (date) {
+    return when (date) {
         today -> "Today"
         today.minus(1, DateTimeUnit.DAY) -> "Yesterday"
         else -> "${date.dayOfMonth} ${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.year}"
     }
-    Text(
-        text = label,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(vertical = 8.dp),
-    )
 }
 
 @Composable
@@ -115,8 +177,7 @@ private fun EntryRow(
         ) {
             if (activity != null) {
                 Box(
-                    modifier = Modifier.size(8.dp, 40.dp)
-                        .padding(end = 0.dp),
+                    modifier = Modifier.size(8.dp, 40.dp),
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -165,5 +226,7 @@ private fun EntryRow(
 }
 
 private fun formatTime(dt: LocalDateTime): String {
-    return "%02d:%02d".format(dt.hour, dt.minute)
+    val h = if (dt.hour < 10) "0${dt.hour}" else "${dt.hour}"
+    val m = if (dt.minute < 10) "0${dt.minute}" else "${dt.minute}"
+    return "$h:$m"
 }

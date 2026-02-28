@@ -5,7 +5,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.timetracker.app.data.repository.CustomFieldRepository
+import com.timetracker.app.domain.model.CustomField
+import com.timetracker.app.domain.model.CustomFieldType
 import com.timetracker.app.presentation.components.ColorPicker
+import com.timetracker.app.presentation.components.IconPicker
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,12 +60,10 @@ fun EditActivityScreen(
                 singleLine = true,
             )
 
-            OutlinedTextField(
-                value = state.icon,
-                onValueChange = viewModel::updateIcon,
-                label = { Text("Icon (emoji)") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+            Text("Icon", style = MaterialTheme.typography.labelLarge)
+            IconPicker(
+                selectedIcon = state.icon,
+                onIconSelected = viewModel::updateIcon,
             )
 
             Text("Color", style = MaterialTheme.typography.labelLarge)
@@ -98,6 +101,95 @@ fun EditActivityScreen(
                             )
                         }
                     }
+                }
+            }
+
+            // Custom fields management (only when editing existing activity)
+            if (state.isEditing && activityId != null) {
+                CustomFieldsSection(activityId = activityId)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CustomFieldsSection(activityId: Long) {
+    val customFieldRepo = koinInject<CustomFieldRepository>()
+    val fields by customFieldRepo.observeByActivityId(activityId).collectAsState(initial = emptyList())
+    var showAddField by remember { mutableStateOf(false) }
+    var newFieldName by remember { mutableStateOf("") }
+    var newFieldType by remember { mutableStateOf(CustomFieldType.Text) }
+
+    Text("Custom Fields", style = MaterialTheme.typography.labelLarge)
+
+    Card {
+        Column(modifier = Modifier.padding(12.dp)) {
+            fields.forEach { field ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Text("${field.name} (${field.fieldType.label})", style = MaterialTheme.typography.bodySmall)
+                    var deleting by remember { mutableStateOf(false) }
+                    if (deleting) {
+                        LaunchedEffect(Unit) {
+                            customFieldRepo.deleteField(field.id)
+                            deleting = false
+                        }
+                    }
+                    TextButton(onClick = { deleting = true }) {
+                        Text("\u2715", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+
+            if (showAddField) {
+                OutlinedTextField(
+                    value = newFieldName,
+                    onValueChange = { newFieldName = it },
+                    label = { Text("Field name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    CustomFieldType.entries.forEach { type ->
+                        FilterChip(
+                            selected = newFieldType == type,
+                            onClick = { newFieldType = type },
+                            label = { Text(type.label) },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    var saving by remember { mutableStateOf(false) }
+                    if (saving && newFieldName.isNotBlank()) {
+                        LaunchedEffect(Unit) {
+                            customFieldRepo.insertField(
+                                CustomField(
+                                    activityId = activityId,
+                                    name = newFieldName.trim(),
+                                    fieldType = newFieldType,
+                                    sortOrder = fields.size,
+                                )
+                            )
+                            newFieldName = ""
+                            showAddField = false
+                            saving = false
+                        }
+                    }
+                    TextButton(onClick = { saving = true }, enabled = newFieldName.isNotBlank()) {
+                        Text("Add")
+                    }
+                    TextButton(onClick = { showAddField = false; newFieldName = "" }) {
+                        Text("Cancel")
+                    }
+                }
+            } else {
+                TextButton(onClick = { showAddField = true }) {
+                    Text("+ Add Custom Field")
                 }
             }
         }

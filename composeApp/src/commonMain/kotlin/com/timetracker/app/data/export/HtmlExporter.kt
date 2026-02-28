@@ -29,7 +29,10 @@ class HtmlExporter {
             val tz = TimeZone.currentSystemDefault()
             val start = entry.startTime.toLocalDateTime(tz)
             val end = entry.endTime.toLocalDateTime(tz)
-            val colorHex = activity?.color?.let { "#%06X".format(it and 0xFFFFFF) } ?: "#999"
+            val colorHex = activity?.color?.let { colorInt ->
+                val hex = (colorInt and 0xFFFFFF).toString(16).padStart(6, '0')
+                "#$hex"
+            } ?: "#999"
             val name = activity?.name ?: "Unknown"
             appendLine("<tr>")
             appendLine("<td><span class='color-dot' style='background:$colorHex'></span>$name</td>")

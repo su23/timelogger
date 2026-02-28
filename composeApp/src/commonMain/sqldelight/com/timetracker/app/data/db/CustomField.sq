@@ -1,0 +1,31 @@
+CREATE TABLE CustomField (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER NOT NULL REFERENCES Activity(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    field_type TEXT NOT NULL DEFAULT "text",
+    options TEXT NOT NULL DEFAULT "",
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX idx_custom_field_activity ON CustomField(activity_id);
+
+selectByActivityId:
+SELECT * FROM CustomField WHERE activity_id = ? ORDER BY sort_order ASC;
+
+selectById:
+SELECT * FROM CustomField WHERE id = ?;
+
+insert:
+INSERT INTO CustomField(activity_id, name, field_type, options, sort_order, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+update:
+UPDATE CustomField SET name = ?, field_type = ?, options = ?, sort_order = ?, updated_at = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM CustomField WHERE id = ?;

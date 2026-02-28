@@ -9,4 +9,5 @@ data class ActiveTimer(
     val accumulatedMs: Long = 0,
     val isPaused: Boolean = false,
     val pausedAt: Instant? = null,
+    val targetDurationMs: Long? = null,
 )

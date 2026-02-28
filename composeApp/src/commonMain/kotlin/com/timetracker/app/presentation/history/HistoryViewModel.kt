@@ -6,6 +6,7 @@ import com.timetracker.app.data.repository.ActivityRepository
 import com.timetracker.app.data.repository.TimeEntryRepository
 import com.timetracker.app.domain.model.Activity
 import com.timetracker.app.domain.model.TimeEntry
+import com.timetracker.app.presentation.components.DaySummary
 import com.timetracker.app.util.toLocalDate
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -15,6 +16,11 @@ data class HistoryUiState(
     val entriesByDate: Map<LocalDate, List<Pair<TimeEntry, Activity?>>> = emptyMap(),
     val activities: Map<Long, Activity> = emptyMap(),
     val isLoading: Boolean = true,
+    val showCalendar: Boolean = false,
+    val calendarYear: Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year,
+    val calendarMonth: Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).monthNumber,
+    val daySummaries: Map<LocalDate, DaySummary> = emptyMap(),
+    val selectedDate: LocalDate? = null,
 )
 
 class HistoryViewModel(
@@ -37,19 +43,84 @@ class HistoryViewModel(
                 activityRepo.observeAllIncludingArchived(),
             ) { entries, activities ->
                 val activityMap = activities.associateBy { it.id }
-                val grouped = entries
-                    .map { entry -> entry to activityMap[entry.activityId] }
-                    .groupBy { (entry, _) -> entry.startTime.toLocalDate(tz) }
-                    .toSortedMap(compareByDescending { it })
+                val entryPairsList: List<Pair<TimeEntry, Activity?>> = entries.map { e: TimeEntry ->
+                    Pair(e, activityMap[e.activityId])
+                }
+                val groupedMap: Map<LocalDate, List<Pair<TimeEntry, Activity?>>> = entryPairsList
+                    .groupBy { pair: Pair<TimeEntry, Activity?> -> pair.first.startTime.toLocalDate(tz) }
+                val sortedKeys = groupedMap.keys.sortedDescending()
+                val grouped: Map<LocalDate, List<Pair<TimeEntry, Activity?>>> = linkedMapOf<LocalDate, List<Pair<TimeEntry, Activity?>>>().also { map ->
+                    for (key in sortedKeys) {
+                        map[key] = groupedMap[key] ?: emptyList()
+                    }
+                }
+
+                // Build day summaries for calendar
+                val summaries = mutableMapOf<LocalDate, DaySummary>()
+                for (mapEntry: Map.Entry<LocalDate, List<Pair<TimeEntry, Activity?>>> in grouped) {
+                    val date: LocalDate = mapEntry.key
+                    val pairs: List<Pair<TimeEntry, Activity?>> = mapEntry.value
+                    var totalMs = 0L
+                    val activityColorMap = mutableMapOf<Long, Int>() // activityId -> color
+                    val activityDurationMap = mutableMapOf<Long, Long>() // activityId -> totalDuration
+                    for (i in pairs.indices) {
+                        val timeEntry: TimeEntry = pairs[i].first
+                        val activity: Activity? = pairs[i].second
+                        totalMs += timeEntry.durationMs
+                        if (activity != null) {
+                            activityColorMap[activity.id] = activity.color
+                            activityDurationMap[activity.id] = (activityDurationMap[activity.id] ?: 0L) + timeEntry.durationMs
+                        }
+                    }
+                    val topColors: List<Int> = activityDurationMap.entries
+                        .sortedByDescending { e -> e.value }
+                        .mapNotNull { e -> activityColorMap[e.key] }
+                    summaries[date] = DaySummary(
+                        date = date,
+                        totalMs = totalMs,
+                        entryCount = pairs.size,
+                        topActivityColors = topColors,
+                    )
+                }
+
                 HistoryUiState(
                     entriesByDate = grouped,
                     activities = activityMap,
                     isLoading = false,
+                    showCalendar = _uiState.value.showCalendar,
+                    calendarYear = _uiState.value.calendarYear,
+                    calendarMonth = _uiState.value.calendarMonth,
+                    daySummaries = summaries,
+                    selectedDate = _uiState.value.selectedDate,
                 )
             }.collect { state ->
                 _uiState.value = state
             }
         }
+    }
+
+    fun toggleCalendar() {
+        _uiState.update { it.copy(showCalendar = !it.showCalendar) }
+    }
+
+    fun previousMonth() {
+        _uiState.update {
+            val newMonth = if (it.calendarMonth == 1) 12 else it.calendarMonth - 1
+            val newYear = if (it.calendarMonth == 1) it.calendarYear - 1 else it.calendarYear
+            it.copy(calendarYear = newYear, calendarMonth = newMonth)
+        }
+    }
+
+    fun nextMonth() {
+        _uiState.update {
+            val newMonth = if (it.calendarMonth == 12) 1 else it.calendarMonth + 1
+            val newYear = if (it.calendarMonth == 12) it.calendarYear + 1 else it.calendarYear
+            it.copy(calendarYear = newYear, calendarMonth = newMonth)
+        }
+    }
+
+    fun selectDate(date: LocalDate) {
+        _uiState.update { it.copy(selectedDate = date, showCalendar = false) }
     }
 
     fun deleteEntry(entryId: Long) {

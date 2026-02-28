@@ -39,6 +39,7 @@ class ActiveTimerRepository(private val db: AppDatabase) {
             timer.accumulatedMs,
             if (timer.isPaused) 1L else 0L,
             timer.pausedAt?.toEpochMilliseconds(),
+            timer.targetDurationMs,
         )
     }
 
@@ -48,6 +49,7 @@ class ActiveTimerRepository(private val db: AppDatabase) {
             timer.accumulatedMs,
             if (timer.isPaused) 1L else 0L,
             timer.pausedAt?.toEpochMilliseconds(),
+            timer.targetDurationMs,
             timer.id,
         )
     }
@@ -64,4 +66,5 @@ private fun com.timetracker.app.data.db.ActiveTimer.toDomain() = ActiveTimer(
     accumulatedMs = accumulated_ms,
     isPaused = is_paused != 0L,
     pausedAt = paused_at?.let { Instant.fromEpochMilliseconds(it) },
+    targetDurationMs = target_duration_ms,
 )

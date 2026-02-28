@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.timetracker.app.data.repository.ActiveTimerRepository
 import com.timetracker.app.data.repository.ActivityRepository
+import com.timetracker.app.data.repository.SettingsRepository
 import com.timetracker.app.domain.model.ActiveTimer
 import com.timetracker.app.domain.model.Activity
 import com.timetracker.app.domain.usecase.PauseTimerUseCase
@@ -20,6 +21,7 @@ data class TrackerUiState(
     val activeTimers: List<ActiveTimer> = emptyList(),
     val currentTimeMs: Long = Clock.System.now().toEpochMilliseconds(),
     val isLoading: Boolean = true,
+    val allowSimultaneous: Boolean = true,
 )
 
 class TrackerViewModel(
@@ -29,6 +31,7 @@ class TrackerViewModel(
     private val stopTimer: StopTimerUseCase,
     private val pauseTimer: PauseTimerUseCase,
     private val resumeTimer: ResumeTimerUseCase,
+    private val settingsRepo: SettingsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TrackerUiState())
@@ -55,6 +58,10 @@ class TrackerViewModel(
         viewModelScope.launch {
             seedDefaultActivities()
         }
+        viewModelScope.launch {
+            val allow = settingsRepo.getBoolean(SettingsRepository.Keys.ALLOW_SIMULTANEOUS, true)
+            _uiState.update { it.copy(allowSimultaneous = allow) }
+        }
     }
 
     fun onActivityClick(activityId: Long) {
@@ -63,8 +70,35 @@ class TrackerViewModel(
             if (existing != null) {
                 stopTimer(activityId)
             } else {
+                // If simultaneous not allowed, stop existing timers
+                if (!_uiState.value.allowSimultaneous) {
+                    _uiState.value.activeTimers.forEach {
+                        stopTimer(it.activityId)
+                    }
+                }
                 startTimer(activityId)
             }
+        }
+    }
+
+    fun startWithCountdown(activityId: Long, targetDurationMs: Long) {
+        viewModelScope.launch {
+            // If simultaneous not allowed, stop existing timers
+            if (!_uiState.value.allowSimultaneous) {
+                _uiState.value.activeTimers.forEach {
+                    stopTimer(it.activityId)
+                }
+            }
+            val existing = activeTimerRepo.getByActivityId(activityId)
+            if (existing != null) return@launch
+            val now = Clock.System.now()
+            activeTimerRepo.insert(
+                ActiveTimer(
+                    activityId = activityId,
+                    startTime = now,
+                    targetDurationMs = targetDurationMs,
+                )
+            )
         }
     }
 
@@ -85,6 +119,12 @@ class TrackerViewModel(
         } else {
             timer.accumulatedMs + (currentTimeMs - timer.startTime.toEpochMilliseconds())
         }
+    }
+
+    fun getCountdownRemainingMs(timer: ActiveTimer, currentTimeMs: Long): Long? {
+        val target = timer.targetDurationMs ?: return null
+        val elapsed = getElapsedMs(timer, currentTimeMs)
+        return target - elapsed
     }
 
     private suspend fun seedDefaultActivities() {

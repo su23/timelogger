@@ -11,26 +11,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.timetracker.app.domain.model.ActivityStats
+import com.timetracker.app.presentation.components.BarChart
 import com.timetracker.app.presentation.components.DateRangeSelector
 import com.timetracker.app.util.formatDurationLong
 import org.koin.compose.viewmodel.koinViewModel
+
+enum class ChartType(val label: String) {
+    Pie("Pie"),
+    Bar("Bar"),
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatsScreen(
     onExport: () -> Unit,
+    onGoals: () -> Unit = {},
     viewModel: StatsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    var chartType by remember { mutableStateOf(ChartType.Pie) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Statistics") },
                 actions = {
+                    TextButton(onClick = onGoals) { Text("Goals") }
                     TextButton(onClick = onExport) { Text("Export") }
                 },
             )
@@ -61,12 +69,41 @@ fun StatsScreen(
                     }
                 }
             } else {
-                // Pie chart
+                // Chart type toggle
                 item {
-                    PieChart(
-                        stats = state.activityStats,
-                        modifier = Modifier.fillMaxWidth().height(220.dp),
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        ChartType.entries.forEach { type ->
+                            FilterChip(
+                                selected = chartType == type,
+                                onClick = { chartType = type },
+                                label = { Text(type.label) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
+
+                // Chart
+                item {
+                    when (chartType) {
+                        ChartType.Pie -> PieChart(
+                            stats = state.activityStats,
+                            modifier = Modifier.fillMaxWidth().height(220.dp),
+                        )
+                        ChartType.Bar -> {
+                            val activityMap = state.activityStats.associate {
+                                it.activity.id to it.activity
+                            }
+                            BarChart(
+                                dailyTotals = state.dailyTotals,
+                                activities = activityMap,
+                                modifier = Modifier.fillMaxWidth().height(220.dp),
+                            )
+                        }
+                    }
                 }
 
                 // Total
@@ -100,6 +137,7 @@ private fun PieChart(
     stats: List<ActivityStats>,
     modifier: Modifier = Modifier,
 ) {
+    val centerColor = MaterialTheme.colorScheme.surface
     Canvas(modifier = modifier) {
         val diameter = minOf(size.width, size.height) - 32f
         val topLeft = Offset(
@@ -119,14 +157,10 @@ private fun PieChart(
             )
             startAngle += sweep
         }
-        // White center circle for donut effect
+        // Center circle for donut effect
         val innerDiameter = diameter * 0.55f
-        val innerTopLeft = Offset(
-            (size.width - innerDiameter) / 2f,
-            (size.height - innerDiameter) / 2f,
-        )
         drawCircle(
-            color = Color.White,
+            color = centerColor,
             radius = innerDiameter / 2f,
             center = Offset(size.width / 2f, size.height / 2f),
         )
@@ -165,7 +199,7 @@ private fun StatRow(stat: ActivityStats) {
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
-                    "${"%.1f".format(stat.percentage)}%",
+                    "${(stat.percentage * 10).toLong() / 10.0}%",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
