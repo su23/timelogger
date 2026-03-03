@@ -1,6 +1,6 @@
 package com.timetracker.app.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class TimeEntry(
     val id: Long = 0,

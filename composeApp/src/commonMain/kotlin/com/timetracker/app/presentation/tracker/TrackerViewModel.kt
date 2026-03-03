@@ -14,7 +14,7 @@ import com.timetracker.app.domain.usecase.StopTimerUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 data class TrackerUiState(
     val activities: List<Activity> = emptyList(),

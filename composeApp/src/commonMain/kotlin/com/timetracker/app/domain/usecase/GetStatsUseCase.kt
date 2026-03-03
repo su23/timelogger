@@ -4,7 +4,7 @@ import com.timetracker.app.data.repository.ActivityRepository
 import com.timetracker.app.data.repository.TimeEntryRepository
 import com.timetracker.app.domain.model.ActivityStats
 import com.timetracker.app.domain.model.DailyTotal
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 class GetStatsUseCase(
     private val timeEntryRepo: TimeEntryRepository,

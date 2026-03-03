@@ -2,17 +2,20 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.sqldelight)
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.timetracker.app.shared"
+        compileSdk = 35
+        minSdk = 26
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
-            freeCompilerArgs.add("-Xexpect-actual-classes")
         }
     }
 
@@ -27,12 +30,25 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
+    sourceSets.all {
+        languageSettings.optIn("kotlin.time.ExperimentalTime")
+    }
+
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
+            @Suppress("DEPRECATION")
+            api(compose.runtime)
+            @Suppress("DEPRECATION")
+            api(compose.ui)
+            @Suppress("DEPRECATION")
             implementation(compose.foundation)
+            @Suppress("DEPRECATION")
             implementation(compose.material3)
-            implementation(compose.ui)
+            @Suppress("DEPRECATION")
             implementation(compose.components.resources)
 
             implementation(libs.navigation.compose)
@@ -47,39 +63,13 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.compose.ui.tooling.preview)
-            implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.android.driver)
-            implementation(libs.koin.android)
+            implementation(libs.androidx.core)
         }
 
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
         }
-    }
-}
-
-android {
-    namespace = "com.timetracker.app"
-    compileSdk = 35
-
-    defaultConfig {
-        applicationId = "com.timetracker.app"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

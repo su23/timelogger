@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
+import androidx.savedstate.read
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.timetracker.app.presentation.tracker.TrackerScreen
@@ -123,7 +124,7 @@ fun AppNavigation() {
                 Routes.EDIT_ACTIVITY,
                 arguments = listOf(navArgument("activityId") { type = NavType.StringType }),
             ) { backStackEntry ->
-                val activityIdStr = backStackEntry.arguments?.getString("activityId")
+                val activityIdStr = backStackEntry.arguments?.read { getStringOrNull("activityId") }
                 val activityId = activityIdStr?.toLongOrNull()
                 EditActivityScreen(
                     activityId = activityId,
@@ -137,7 +138,7 @@ fun AppNavigation() {
                 Routes.EDIT_ENTRY,
                 arguments = listOf(navArgument("entryId") { type = NavType.StringType }),
             ) { backStackEntry ->
-                val entryIdStr = backStackEntry.arguments?.getString("entryId")
+                val entryIdStr = backStackEntry.arguments?.read { getStringOrNull("entryId") }
                 val entryId = entryIdStr?.toLongOrNull()
                 EditEntryScreen(
                     entryId = entryId,
@@ -161,7 +162,7 @@ fun AppNavigation() {
                 Routes.EDIT_GOAL,
                 arguments = listOf(navArgument("goalId") { type = NavType.StringType }),
             ) { backStackEntry ->
-                val goalIdStr = backStackEntry.arguments?.getString("goalId")
+                val goalIdStr = backStackEntry.arguments?.read { getStringOrNull("goalId") }
                 val goalId = goalIdStr?.toLongOrNull()
                 EditGoalScreen(
                     goalId = goalId,

@@ -6,6 +6,7 @@ import com.timetracker.app.domain.model.*
 import com.timetracker.app.util.*
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.*
+import kotlin.time.Instant
 
 class CheckGoalsUseCase(
     private val goalRepo: GoalRepository,

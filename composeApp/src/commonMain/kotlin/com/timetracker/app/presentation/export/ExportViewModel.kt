@@ -11,7 +11,7 @@ import com.timetracker.app.presentation.components.DateRangeOption
 import com.timetracker.app.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 enum class ExportFormat(val label: String, val extension: String) {
     CSV("CSV", "csv"),

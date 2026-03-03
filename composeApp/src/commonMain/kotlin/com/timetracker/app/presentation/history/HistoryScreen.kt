@@ -14,6 +14,7 @@ import com.timetracker.app.domain.model.TimeEntry
 import com.timetracker.app.presentation.components.CalendarView
 import com.timetracker.app.util.formatDuration
 import kotlinx.datetime.*
+import kotlin.time.Clock
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,7 +139,7 @@ private fun formatDateLabel(date: LocalDate): String {
     return when (date) {
         today -> "Today"
         today.minus(1, DateTimeUnit.DAY) -> "Yesterday"
-        else -> "${date.dayOfMonth} ${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.year}"
+        else -> "${date.day} ${date.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.year}"
     }
 }
 

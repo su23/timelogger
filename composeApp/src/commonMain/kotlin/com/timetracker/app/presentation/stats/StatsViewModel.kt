@@ -11,7 +11,7 @@ import com.timetracker.app.presentation.components.DateRangeOption
 import com.timetracker.app.util.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class StatsUiState(
     val rangeOption: DateRangeOption = DateRangeOption.Week,

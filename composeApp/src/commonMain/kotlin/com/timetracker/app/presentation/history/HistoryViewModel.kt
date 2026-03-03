@@ -11,6 +11,7 @@ import com.timetracker.app.util.toLocalDate
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import kotlin.time.Clock
 
 data class HistoryUiState(
     val entriesByDate: Map<LocalDate, List<Pair<TimeEntry, Activity?>>> = emptyMap(),
@@ -18,7 +19,7 @@ data class HistoryUiState(
     val isLoading: Boolean = true,
     val showCalendar: Boolean = false,
     val calendarYear: Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year,
-    val calendarMonth: Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).monthNumber,
+    val calendarMonth: Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).month.number,
     val daySummaries: Map<LocalDate, DaySummary> = emptyMap(),
     val selectedDate: LocalDate? = null,
 )

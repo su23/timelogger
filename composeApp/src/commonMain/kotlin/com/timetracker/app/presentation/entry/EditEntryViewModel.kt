@@ -9,6 +9,7 @@ import com.timetracker.app.domain.model.TimeEntry
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import kotlin.time.Clock
 
 data class EditEntryUiState(
     val activityId: Long? = null,

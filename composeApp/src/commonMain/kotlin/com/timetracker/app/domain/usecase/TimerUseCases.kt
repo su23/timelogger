@@ -4,7 +4,7 @@ import com.timetracker.app.data.repository.ActiveTimerRepository
 import com.timetracker.app.data.repository.TimeEntryRepository
 import com.timetracker.app.domain.model.ActiveTimer
 import com.timetracker.app.domain.model.TimeEntry
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class StartTimerUseCase(
     private val activeTimerRepo: ActiveTimerRepository,
