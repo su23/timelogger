@@ -1,6 +1,7 @@
 package com.timetracker.app.di
 
 import com.timetracker.app.data.db.AppDatabase
+import com.timetracker.app.data.db.DatabaseMaintenance
 import com.timetracker.app.data.db.DriverFactory
 import com.timetracker.app.data.repository.ActiveTimerRepository
 import com.timetracker.app.data.repository.ActivityGroupRepository
@@ -35,6 +36,8 @@ fun appModule(): Module = module {
         val driver = get<DriverFactory>().createDriver()
         AppDatabase(driver)
     }
+
+    single { DatabaseMaintenance(get()) }
 
     single { ActivityGroupRepository(get()) }
     single { ActivityRepository(get()) }

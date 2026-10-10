@@ -1,0 +1,25 @@
+-- Rows left behind by deletes made before foreign keys were switched on. SQLite
+-- ignores a schema's foreign keys unless the connection enables them, so every
+-- ON DELETE CASCADE in this schema was inert and deleting an activity orphaned
+-- its entries instead of removing them. Run once at startup; a no-op thereafter.
+
+deleteOrphanedTimeEntries:
+DELETE FROM TimeEntry
+WHERE activity_id NOT IN (SELECT id FROM Activity);
+
+deleteOrphanedActiveTimers:
+DELETE FROM ActiveTimer
+WHERE activity_id NOT IN (SELECT id FROM Activity);
+
+deleteOrphanedGoals:
+DELETE FROM Goal
+WHERE activity_id NOT IN (SELECT id FROM Activity);
+
+deleteOrphanedCustomFields:
+DELETE FROM CustomField
+WHERE activity_id NOT IN (SELECT id FROM Activity);
+
+deleteOrphanedCustomFieldValues:
+DELETE FROM CustomFieldValue
+WHERE entry_id NOT IN (SELECT id FROM TimeEntry)
+   OR field_id NOT IN (SELECT id FROM CustomField);

@@ -1,6 +1,7 @@
 package com.timetracker.app
 
 import androidx.compose.runtime.*
+import com.timetracker.app.data.db.DatabaseMaintenance
 import com.timetracker.app.data.repository.SettingsRepository
 import com.timetracker.app.presentation.theme.AppTheme
 import com.timetracker.app.presentation.navigation.AppNavigation
@@ -12,7 +13,12 @@ import org.koin.compose.koinInject
 @Composable
 fun App() {
     val settingsRepo = koinInject<SettingsRepository>()
+    val maintenance = koinInject<DatabaseMaintenance>()
     var themeOverride by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        maintenance.deleteOrphanedRows()
+    }
 
     LaunchedEffect(Unit) {
         val theme = withContext(Dispatchers.IO) {
