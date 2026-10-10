@@ -118,7 +118,9 @@ fun PomodoroScreen(
                     PomodoroPhase.LongBreak -> MaterialTheme.colorScheme.secondary
                     PomodoroPhase.Idle -> MaterialTheme.colorScheme.outlineVariant
                 }
-                val trackColor = MaterialTheme.colorScheme.surfaceVariant
+                // surfaceVariant sits a shade off the background in the light scheme, which
+                // left the track invisible. A tinted onSurface reads in both themes.
+                val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
 
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val strokeWidth = 12.dp.toPx()

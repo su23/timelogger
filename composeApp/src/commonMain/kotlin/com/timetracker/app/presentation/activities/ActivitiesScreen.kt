@@ -55,7 +55,10 @@ fun ActivitiesScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(16.dp),
+                // Bottom inset keeps the last row clear of the floating action button.
+                contentPadding = PaddingValues(
+                    start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp,
+                ),
             ) {
                 items(state.activities, key = { it.id }) { activity ->
                     ActivityListItem(

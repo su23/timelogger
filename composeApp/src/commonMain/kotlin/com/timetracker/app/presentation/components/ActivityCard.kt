@@ -46,7 +46,7 @@ fun ActivityCard(
 
     Card(
         modifier = modifier
-            .width(100.dp)
+            .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
