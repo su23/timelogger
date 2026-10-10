@@ -2,6 +2,7 @@ package com.timetracker.app.presentation.export
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.timetracker.app.data.export.ExportShare
 import com.timetracker.app.presentation.components.DateRangeSelector
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,6 +24,7 @@ fun ExportScreen(
     viewModel: ExportViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val share = koinInject<ExportShare>()
 
     Scaffold(
         topBar = {
@@ -82,11 +86,20 @@ fun ExportScreen(
                             .horizontalScroll(rememberScrollState()),
                     )
                 }
-                Text(
-                    "Content copied to clipboard / use platform share",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Button(
+                    onClick = {
+                        share.share(
+                            fileName = "time-tracking.${state.format.extension}",
+                            mimeType = state.format.mimeType,
+                            content = content,
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Share \u2026")
+                }
             }
         }
     }

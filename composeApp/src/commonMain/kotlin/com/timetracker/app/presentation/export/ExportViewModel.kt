@@ -13,9 +13,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.time.Instant
 
-enum class ExportFormat(val label: String, val extension: String) {
-    CSV("CSV", "csv"),
-    HTML("HTML", "html"),
+enum class ExportFormat(val label: String, val extension: String, val mimeType: String) {
+    CSV("CSV", "csv", "text/csv"),
+    HTML("HTML", "html", "text/html"),
 }
 
 data class ExportUiState(
