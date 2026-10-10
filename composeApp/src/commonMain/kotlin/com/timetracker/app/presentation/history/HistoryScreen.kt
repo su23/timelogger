@@ -1,5 +1,9 @@
 package com.timetracker.app.presentation.history
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,7 +43,7 @@ fun HistoryScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewEntry) {
-                Text("+", style = MaterialTheme.typography.headlineSmall)
+                Icon(Icons.Filled.Add, contentDescription = "New entry")
             }
         },
     ) { padding ->
@@ -189,7 +193,7 @@ private fun EntryRow(
                 }
                 Spacer(Modifier.width(12.dp))
                 if (activity.icon.isNotEmpty()) {
-                    Text(activity.icon)
+                    Text(activity.icon, modifier = Modifier.clearAndSetSemantics {})
                     Spacer(Modifier.width(8.dp))
                 }
             }
@@ -220,7 +224,11 @@ private fun EntryRow(
             )
             Spacer(Modifier.width(8.dp))
             IconButton(onClick = { showDeleteDialog = true }) {
-                Text("\u2715", color = MaterialTheme.colorScheme.error)
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Delete entry",
+                    tint = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

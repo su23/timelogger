@@ -1,5 +1,9 @@
 package com.timetracker.app.presentation.settings
 
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -22,7 +26,9 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
             )
         },
@@ -152,15 +158,15 @@ private fun NumberSetting(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            TextButton(
+            IconButton(
                 onClick = { onValueChange(value - 1) },
                 enabled = value > 1,
             ) {
-                Text("-")
+                Icon(Icons.Filled.Remove, contentDescription = "Decrease $label")
             }
             Text("$value", style = MaterialTheme.typography.bodyLarge)
-            TextButton(onClick = { onValueChange(value + 1) }) {
-                Text("+")
+            IconButton(onClick = { onValueChange(value + 1) }) {
+                Icon(Icons.Filled.Add, contentDescription = "Increase $label")
             }
         }
     }

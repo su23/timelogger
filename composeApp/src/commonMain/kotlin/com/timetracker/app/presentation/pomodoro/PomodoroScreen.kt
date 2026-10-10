@@ -1,5 +1,7 @@
 package com.timetracker.app.presentation.pomodoro
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -31,7 +33,9 @@ fun PomodoroScreen(
             TopAppBar(
                 title = { Text("Pomodoro") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
             )
         },

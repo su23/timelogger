@@ -1,5 +1,7 @@
 package com.timetracker.app.presentation.entry
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -56,7 +58,9 @@ fun EditEntryScreen(
             TopAppBar(
                 title = { Text(if (state.isEditing) "Edit Entry" else "New Entry") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
                 actions = {
                     TextButton(

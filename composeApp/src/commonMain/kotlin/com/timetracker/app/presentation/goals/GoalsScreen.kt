@@ -1,5 +1,10 @@
 package com.timetracker.app.presentation.goals
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,13 +34,15 @@ fun GoalsScreen(
             TopAppBar(
                 title = { Text("Goals") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewGoal) {
-                Text("+", style = MaterialTheme.typography.headlineSmall)
+                Icon(Icons.Filled.Add, contentDescription = "New goal")
             }
         },
     ) { padding ->
@@ -111,7 +118,7 @@ private fun GoalCard(
                 )
                 Spacer(Modifier.width(12.dp))
                 if (progress.activity.icon.isNotEmpty()) {
-                    Text(progress.activity.icon)
+                    Text(progress.activity.icon, modifier = Modifier.clearAndSetSemantics {})
                     Spacer(Modifier.width(8.dp))
                 }
                 Column(modifier = Modifier.weight(1f)) {
@@ -123,7 +130,11 @@ private fun GoalCard(
                     )
                 }
                 IconButton(onClick = { showDeleteDialog = true }) {
-                    Text("\u2715", color = MaterialTheme.colorScheme.error)
+                    Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Delete goal for ${progress.activity.name}",
+                    tint = MaterialTheme.colorScheme.error,
+                )
                 }
             }
 

@@ -1,5 +1,11 @@
 package com.timetracker.app.presentation.tracker
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -78,14 +84,14 @@ fun TrackerScreen(
         TopAppBar(
             title = { Text("Time Tracker") },
             actions = {
-                TextButton(onClick = onPomodoro) {
-                    Text("\uD83C\uDF45")
+                IconButton(onClick = onPomodoro) {
+                    Icon(Icons.Filled.Timer, contentDescription = "Pomodoro")
                 }
                 TextButton(onClick = onManageActivities) {
                     Text("Activities")
                 }
-                TextButton(onClick = onSettings) {
-                    Text("\u2699\uFE0F")
+                IconButton(onClick = onSettings) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }
             },
         )
@@ -233,11 +239,18 @@ private fun RunningTimerRow(
                     )
                 }
             }
-            TextButton(onClick = onPauseResume) {
-                Text(if (timer.isPaused) "\u25B6" else "\u23F8")
+            IconButton(onClick = onPauseResume) {
+                Icon(
+                    if (timer.isPaused) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                    contentDescription = if (timer.isPaused) "Resume timer" else "Pause timer",
+                )
             }
-            TextButton(onClick = onStop) {
-                Text("\u23F9", color = MaterialTheme.colorScheme.error)
+            IconButton(onClick = onStop) {
+                Icon(
+                    Icons.Filled.Stop,
+                    contentDescription = "Stop timer",
+                    tint = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

@@ -50,6 +50,8 @@ kotlin {
             implementation(compose.material3)
             @Suppress("DEPRECATION")
             implementation(compose.components.resources)
+            @Suppress("DEPRECATION")
+            implementation(compose.materialIconsExtended)
 
             implementation(libs.navigation.compose)
             implementation(libs.lifecycle.viewmodel.compose)

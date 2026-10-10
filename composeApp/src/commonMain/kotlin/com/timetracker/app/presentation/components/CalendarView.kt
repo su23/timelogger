@@ -1,5 +1,8 @@
 package com.timetracker.app.presentation.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -49,12 +52,16 @@ fun CalendarView(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onPreviousMonth) { Text("\u25C0") }
+            IconButton(onClick = onPreviousMonth) {
+                Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = "Previous month")
+            }
             Text(
                 text = "${monthObj.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} $year",
                 style = MaterialTheme.typography.titleMedium,
             )
-            TextButton(onClick = onNextMonth) { Text("\u25B6") }
+            IconButton(onClick = onNextMonth) {
+                Icon(Icons.Filled.KeyboardArrowRight, contentDescription = "Next month")
+            }
         }
 
         Spacer(Modifier.height(8.dp))

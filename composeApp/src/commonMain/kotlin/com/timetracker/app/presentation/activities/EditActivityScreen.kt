@@ -1,5 +1,8 @@
 package com.timetracker.app.presentation.activities
 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,7 +38,9 @@ fun EditActivityScreen(
             TopAppBar(
                 title = { Text(if (state.isEditing) "Edit Activity" else "New Activity") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
                 actions = {
                     TextButton(
@@ -139,7 +144,11 @@ private fun CustomFieldsSection(activityId: Long) {
                         }
                     }
                     TextButton(onClick = { deleting = true }) {
-                        Text("\u2715", color = MaterialTheme.colorScheme.error)
+                        Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Remove custom field ${field.name}",
+                    tint = MaterialTheme.colorScheme.error,
+                )
                     }
                 }
             }

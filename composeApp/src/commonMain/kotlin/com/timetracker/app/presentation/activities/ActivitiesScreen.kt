@@ -1,5 +1,10 @@
 package com.timetracker.app.presentation.activities
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,7 +33,9 @@ fun ActivitiesScreen(
             TopAppBar(
                 title = { Text("Activities") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
                 actions = {
                     TextButton(onClick = onManageGroups) { Text("Groups") }
@@ -37,7 +44,7 @@ fun ActivitiesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewActivity) {
-                Text("+", style = MaterialTheme.typography.headlineSmall)
+                Icon(Icons.Filled.Add, contentDescription = "New activity")
             }
         },
     ) { padding ->
@@ -114,6 +121,7 @@ private fun ActivityListItem(
                         if (activity.icon.isNotEmpty()) activity.icon else activity.name.take(1),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
+                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
             }
@@ -129,7 +137,11 @@ private fun ActivityListItem(
                 Text(if (activity.isArchived) "Restore" else "Archive")
             }
             IconButton(onClick = { showDeleteDialog = true }) {
-                Text("\u2715", color = MaterialTheme.colorScheme.error)
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Delete ${activity.name}",
+                    tint = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

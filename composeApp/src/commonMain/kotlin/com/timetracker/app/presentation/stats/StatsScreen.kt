@@ -1,5 +1,6 @@
 package com.timetracker.app.presentation.stats
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -182,7 +183,7 @@ private fun StatRow(stat: ActivityStats) {
             )
             Spacer(Modifier.width(12.dp))
             if (stat.activity.icon.isNotEmpty()) {
-                Text(stat.activity.icon)
+                Text(stat.activity.icon, modifier = Modifier.clearAndSetSemantics {})
                 Spacer(Modifier.width(8.dp))
             }
             Column(modifier = Modifier.weight(1f)) {

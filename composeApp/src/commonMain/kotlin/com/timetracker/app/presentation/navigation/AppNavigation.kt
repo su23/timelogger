@@ -1,5 +1,10 @@
 package com.timetracker.app.presentation.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -43,10 +48,10 @@ object Routes {
     fun editGoal(id: Long) = "edit_goal/$id"
 }
 
-enum class BottomTab(val route: String, val label: String, val icon: String) {
-    Tracker(Routes.TRACKER, "Tracker", "timer"),
-    History(Routes.HISTORY, "History", "list"),
-    Stats(Routes.STATS, "Stats", "chart"),
+enum class BottomTab(val route: String, val label: String, val icon: ImageVector) {
+    Tracker(Routes.TRACKER, "Tracker", Icons.Filled.Timer),
+    History(Routes.HISTORY, "History", Icons.AutoMirrored.Filled.List),
+    Stats(Routes.STATS, "Stats", Icons.Filled.BarChart),
 }
 
 @Composable
@@ -76,11 +81,9 @@ fun AppNavigation() {
                             },
                             label = { Text(tab.label) },
                             icon = {
-                                when (tab) {
-                                    BottomTab.Tracker -> Text("\u23F1", style = MaterialTheme.typography.titleMedium)
-                                    BottomTab.History -> Text("\u2630", style = MaterialTheme.typography.titleMedium)
-                                    BottomTab.Stats -> Text("\u2603", style = MaterialTheme.typography.titleMedium)
-                                }
+                                // The adjacent label already names the tab, so the icon
+                                // stays decorative rather than being announced twice.
+                                Icon(tab.icon, contentDescription = null)
                             },
                         )
                     }

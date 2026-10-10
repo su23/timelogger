@@ -1,5 +1,6 @@
 package com.timetracker.app.presentation.components
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,6 +77,7 @@ fun ActivityCard(
                     Text(
                         text = activity.icon,
                         fontSize = 22.sp,
+                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 } else {
                     Text(

@@ -1,5 +1,7 @@
 package com.timetracker.app.presentation.goals
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +34,9 @@ fun EditGoalScreen(
             TopAppBar(
                 title = { Text(if (state.isEditing) "Edit Goal" else "New Goal") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
                 actions = {
                     TextButton(

@@ -1,5 +1,8 @@
 package com.timetracker.app.presentation.groups
 
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +29,9 @@ fun GroupsScreen(
             TopAppBar(
                 title = { Text("Groups") },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text("\u2190") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
             )
         },
@@ -143,7 +148,11 @@ private fun GroupItem(
             Spacer(Modifier.width(12.dp))
             Text(group.name, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
             IconButton(onClick = { showDeleteDialog = true }) {
-                Text("\u2715", color = MaterialTheme.colorScheme.error)
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Delete group ${group.name}",
+                    tint = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }
