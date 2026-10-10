@@ -33,14 +33,31 @@ class HtmlExporter {
                 val hex = (colorInt and 0xFFFFFF).toString(16).padStart(6, '0')
                 "#$hex"
             } ?: "#999"
-            val name = activity?.name ?: "Unknown"
+            val name = escape(activity?.name ?: "Unknown")
             appendLine("<tr>")
             appendLine("<td><span class='color-dot' style='background:$colorHex'></span>$name</td>")
             appendLine("<td>$start</td><td>$end</td>")
             appendLine("<td>${formatDuration(entry.durationMs)}</td>")
-            appendLine("<td>${entry.comment}</td>")
+            appendLine("<td>${escape(entry.comment)}</td>")
             appendLine("</tr>")
         }
         appendLine("</tbody></table></body></html>")
+    }
+
+    /**
+     * Escapes the characters that would otherwise end the surrounding cell, so an
+     * activity named "Research <client>" or a comment containing & renders as typed.
+     */
+    private fun escape(value: String): String = buildString(value.length) {
+        value.forEach { c ->
+            when (c) {
+                '&' -> append("&amp;")
+                '<' -> append("&lt;")
+                '>' -> append("&gt;")
+                '"' -> append("&quot;")
+                '\'' -> append("&#39;")
+                else -> append(c)
+            }
+        }
     }
 }
