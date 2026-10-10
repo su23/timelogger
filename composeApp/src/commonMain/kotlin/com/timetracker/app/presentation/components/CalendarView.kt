@@ -1,5 +1,6 @@
 package com.timetracker.app.presentation.components
 
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -29,6 +30,7 @@ data class DaySummary(
 fun CalendarView(
     yearMonth: Pair<Int, Int>, // year, month (1-12)
     daySummaries: Map<LocalDate, DaySummary>,
+    selectedDate: LocalDate?,
     onDayClick: (LocalDate) -> Unit,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
@@ -98,6 +100,7 @@ fun CalendarView(
                         CalendarDayCell(
                             day = dayCounter,
                             isToday = date == today,
+                            isSelected = date == selectedDate,
                             hasEntries = summary != null && summary.entryCount > 0,
                             topColors = summary?.topActivityColors ?: emptyList(),
                             onClick = { onDayClick(date) },
@@ -117,6 +120,7 @@ fun CalendarView(
 private fun CalendarDayCell(
     day: Int,
     isToday: Boolean,
+    isSelected: Boolean,
     hasEntries: Boolean,
     topColors: List<Int>,
     onClick: () -> Unit,
@@ -135,10 +139,14 @@ private fun CalendarDayCell(
                 modifier = Modifier
                     .size(28.dp)
                     .then(
-                        if (isToday) {
-                            Modifier.clip(CircleShape).background(MaterialTheme.colorScheme.primary)
-                        } else {
-                            Modifier
+                        // Selected day is filled; today is outlined, so the two
+                        // read differently when they are not the same day.
+                        when {
+                            isSelected -> Modifier.clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                            isToday -> Modifier.clip(CircleShape)
+                                .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                            else -> Modifier
                         }
                     ),
                 contentAlignment = Alignment.Center,
@@ -146,7 +154,11 @@ private fun CalendarDayCell(
                 Text(
                     text = "$day",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                    color = when {
+                        isSelected -> MaterialTheme.colorScheme.onPrimary
+                        isToday -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurface
+                    },
                 )
             }
 

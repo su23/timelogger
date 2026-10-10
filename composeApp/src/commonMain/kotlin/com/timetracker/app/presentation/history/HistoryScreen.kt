@@ -59,6 +59,7 @@ fun HistoryScreen(
                 CalendarView(
                     yearMonth = state.calendarYear to state.calendarMonth,
                     daySummaries = state.daySummaries,
+                    selectedDate = state.selectedDate,
                     onDayClick = { date -> viewModel.selectDate(date) },
                     onPreviousMonth = { viewModel.previousMonth() },
                     onNextMonth = { viewModel.nextMonth() },
@@ -76,7 +77,10 @@ fun HistoryScreen(
                     val entries = state.entriesByDate[date]
                     if (entries != null && entries.isNotEmpty()) {
                         LazyColumn(
+                            modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(4.dp),
+                            // Clear of the floating action button, as on the list view.
+                            contentPadding = PaddingValues(bottom = 88.dp),
                         ) {
                             items(entries, key = { (entry, _) -> entry.id }) { (entry, activity) ->
                                 EntryRow(

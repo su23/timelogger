@@ -121,7 +121,11 @@ class HistoryViewModel(
     }
 
     fun selectDate(date: LocalDate) {
-        _uiState.update { it.copy(selectedDate = date, showCalendar = false) }
+        // Stay on the calendar and show the day underneath it. Closing the
+        // calendar here meant the day detail below the grid never rendered.
+        _uiState.update {
+            it.copy(selectedDate = if (it.selectedDate == date) null else date)
+        }
     }
 
     fun deleteEntry(entryId: Long) {
