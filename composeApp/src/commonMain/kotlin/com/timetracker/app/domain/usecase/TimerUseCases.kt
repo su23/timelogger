@@ -5,6 +5,7 @@ import com.timetracker.app.data.repository.TimeEntryRepository
 import com.timetracker.app.domain.model.ActiveTimer
 import com.timetracker.app.domain.model.TimeEntry
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 class StartTimerUseCase(
     private val activeTimerRepo: ActiveTimerRepository,
@@ -35,11 +36,17 @@ class StopTimerUseCase(
             timer.accumulatedMs + (now.toEpochMilliseconds() - timer.startTime.toEpochMilliseconds())
         }
         if (elapsed > 0) {
+            // A paused timer stopped later did no work while it sat paused, so the entry
+            // ends when it was paused, not now. The start is derived from the end and the
+            // measured duration: ActiveTimer.startTime is reset on every resume, so it is
+            // the start of the last running stretch rather than of the entry as a whole.
+            val endTime = if (timer.isPaused) timer.pausedAt ?: now else now
+            val startTime = Instant.fromEpochMilliseconds(endTime.toEpochMilliseconds() - elapsed)
             timeEntryRepo.insert(
                 TimeEntry(
                     activityId = activityId,
-                    startTime = timer.startTime,
-                    endTime = now,
+                    startTime = startTime,
+                    endTime = endTime,
                     durationMs = elapsed,
                 )
             )
