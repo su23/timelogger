@@ -29,8 +29,25 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.recentlyDeleted) {
+        val deleted = state.recentlyDeleted ?: return@LaunchedEffect
+        val result = snackbarHostState.showSnackbar(
+            message = "Entry deleted",
+            actionLabel = "Undo",
+            withDismissAction = true,
+            duration = SnackbarDuration.Short,
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            viewModel.undoDelete()
+        } else {
+            viewModel.clearRecentlyDeleted()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("History") },
@@ -161,24 +178,8 @@ private fun EntryRow(
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete entry?") },
-            text = { Text("This cannot be undone.") },
-            confirmButton = {
-                TextButton(onClick = { onDelete(); showDeleteDialog = false }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
-            },
-        )
-    }
-
+    // Deleting an entry is undoable from the snackbar, so it does not also
+    // ask first; a dialog that says "this cannot be undone" would be wrong.
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -230,7 +231,7 @@ private fun EntryRow(
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(Modifier.width(8.dp))
-            IconButton(onClick = { showDeleteDialog = true }) {
+            IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Filled.Close,
                     contentDescription = "Delete entry",

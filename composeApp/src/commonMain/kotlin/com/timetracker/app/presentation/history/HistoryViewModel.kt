@@ -22,6 +22,7 @@ data class HistoryUiState(
     val calendarMonth: Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).month.number,
     val daySummaries: Map<LocalDate, DaySummary> = emptyMap(),
     val selectedDate: LocalDate? = null,
+    val recentlyDeleted: TimeEntry? = null,
 )
 
 class HistoryViewModel(
@@ -84,18 +85,19 @@ class HistoryViewModel(
                     )
                 }
 
-                HistoryUiState(
-                    entriesByDate = grouped,
-                    activities = activityMap,
-                    isLoading = false,
-                    showCalendar = _uiState.value.showCalendar,
-                    calendarYear = _uiState.value.calendarYear,
-                    calendarMonth = _uiState.value.calendarMonth,
-                    daySummaries = summaries,
-                    selectedDate = _uiState.value.selectedDate,
-                )
-            }.collect { state ->
-                _uiState.value = state
+                Triple(grouped, activityMap, summaries)
+            }.collect { (grouped, activityMap, summaries) ->
+                // Copy onto the current state rather than rebuilding it. A fresh
+                // HistoryUiState(...) silently dropped every field not listed
+                // here, so anything set between emissions was lost.
+                _uiState.update {
+                    it.copy(
+                        entriesByDate = grouped,
+                        activities = activityMap,
+                        daySummaries = summaries,
+                        isLoading = false,
+                    )
+                }
             }
         }
     }
@@ -130,7 +132,23 @@ class HistoryViewModel(
 
     fun deleteEntry(entryId: Long) {
         viewModelScope.launch {
+            // Keep the row so the snackbar can offer it back. A delete is one
+            // tap on a row of identical buttons, and it is otherwise final.
+            val deleted = timeEntryRepo.observeById(entryId).first()
             timeEntryRepo.delete(entryId)
+            _uiState.update { it.copy(recentlyDeleted = deleted) }
         }
+    }
+
+    fun undoDelete() {
+        val entry = _uiState.value.recentlyDeleted ?: return
+        viewModelScope.launch {
+            timeEntryRepo.insert(entry)
+            _uiState.update { it.copy(recentlyDeleted = null) }
+        }
+    }
+
+    fun clearRecentlyDeleted() {
+        _uiState.update { it.copy(recentlyDeleted = null) }
     }
 }
